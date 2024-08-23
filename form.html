@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request for EcoSort</title>
+    <link rel="icon" href="ideam.png" type="image/x-icon" />
+    <link rel="stylesheet" href="form.css">
+</head>
+<body>
+    <h1>Welcome Environmentalist</h1>
+    <h2>Wonder why am I calling you this?</h2>
+    <h3>You people are volunteering, taking responsibility in protecting and innovating the way we see the nature </h3>
+    <form action="">
+        <!-- <h1>Payment form</h1> -->
+        <p>Required information are followed by *</p>
+        <h2>Contact details</h2>
+        <!-- the attribute name is the storage in server.. any input of name by the user is stored in server under the given "name" -->
+        <p>Name:<sup>*</sup> <input type="text" name="name" required/></p>
+        
+          <h2>Gender<sup>*</sup></h2>
+          <p>
+            Male <input type="radio" name="Gender" id="Male" required/> 
+            Female<input type="radio" name="Gender" id="Female" required/>
+          </p>
+        
+        <!-- fieldset is used to put a box -->
+        <!-- legend is used to name the field -->
+        <p>
+          <!-- Address: <sup>*</sup><textarea name="Address" id="" cols="50" rows="10" required></textarea> -->
+        </p>
+        <p>Email: <sup>*</sup><input type="email" name="email" id="email" required></p>
+        <p>Pincode: <sup>*</sup><input type="number" name="Pincode" id="Pincode" required></p>
+        <hr>
+        <!-- <h2>Payment details</h2>
+        <p>Card details: <sup>*</sup>
+          <select name="card details" id="card details" required>
+              <option value="">--Select a card--</option>
+              <option value="visa">Visa</option>
+              <option value="hdfc credit card">hdfc credit card</option>
+              <option value="rupay">rupay</option>
+          </select>
+        </p>
+        <p>Card number<sup>*</sup>: <input type="card_number" name="card_number" id="card_number" required></p>
+        <p>Expiry date:<sup>*</sup> <input type="date" name="exiry_date" id="exiry_date" required></p>
+        <p>CVV:<sup>*</sup> <input type="password" name="CVV" id="CVV" required></p>
+        <input type="submit" value="Pay now"> -->
+        <p>Please enter the Locality or the Pincode</p>
+        <!-- <h1>Location to Map</h1> -->
+    <input type="text" id="region" name="region" placeholder="Enter Address">
+    <div id="dropdownContainer">
+        <select id="locationDropdown">
+            <option value="">Choose a location</option>
+        </select>
+    </div>
+    <button type="submit" id="submitBtn">Submit</button>
+    <button type="button" onclick="openMap()">Open Map</button>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var mapWindow = null; // Variable to hold reference to the map window
+
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            var address = document.getElementById('locationDropdown').value;
+            if (address.trim() !== '') {
+                openMap(address);
+            } else {
+                alert('Please select a location.');
+            }
+        });
+
+        function openMap(address) {
+            if (mapWindow == null || mapWindow.closed) {
+                // Open the map in a new tab if it's not already open
+                mapWindow = window.open('map.html', '_blank');
+            }
+            // Send address to the map window
+            if (mapWindow != null) {
+                mapWindow.postMessage(address, '*');
+            }
+        }
+
+        // Update dropdown menu as user types
+        document.getElementById('region').addEventListener('input', function() {
+            var input = this.value;
+            var dropdown = document.getElementById('locationDropdown');
+            dropdown.innerHTML = ''; // Clear previous options
+            if (input.trim() !== '') {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(place => {
+                            var option = document.createElement('option');
+                            option.value = place.display_name;
+                            option.text = place.display_name;
+                            dropdown.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    </script>
+</body>
+</html>

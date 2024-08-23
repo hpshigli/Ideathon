@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="icon" href="ideam.png" type="image/x-icon" />
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Listen for messages from the main window
+        window.addEventListener('message', function(event) {
+            var address = event.data;
+            if (address.trim() !== '') {
+                geocodeAddress(address);
+            }
+        });
+
+        var map = L.map('map').setView([0, 0], 2);
+        var markers = {};
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        function geocodeAddress(address) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        var lat = parseFloat(data[0].lat);
+                        var lon = parseFloat(data[0].lon);
+                        var latlng = L.latLng(lat, lon);
+                        var existingMarker = markers[address];
+                        if (existingMarker) {
+                            existingMarker.count++;
+                            existingMarker.marker.setPopupContent(`<b>${address}</b><br>Number of people: ${existingMarker.count}`).openPopup();
+                        } else {
+                            var marker = L.marker(latlng).addTo(map);
+                            marker.count = 1;
+                            marker.bindPopup(`<b>${address}</b><br>Number of people: ${marker.count}`).openPopup();
+                            markers[address] = { marker: marker, count: 1 };
+                        }
+                        map.setView([lat, lon], 10);
+                    } else {
+                        alert('Location not found.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
